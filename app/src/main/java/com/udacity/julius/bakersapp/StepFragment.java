@@ -48,6 +48,7 @@ import static android.content.Context.NOTIFICATION_SERVICE;
  * create an instance of this fragment.
  */
 public class StepFragment extends Fragment implements ExoPlayer.EventListener {
+
     // TODO: Rename parameter arguments, choose names that match
     private static final String ARG_PARAM1 = "param1";
     private static final String TAG = StepFragment.class.getSimpleName();

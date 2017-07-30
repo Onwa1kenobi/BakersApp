@@ -41,19 +41,19 @@ public class RecipeDetailsActivity extends AppCompatActivity
             if (savedInstanceState == null) {
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
+
                 fragmentManager.beginTransaction()
-                        .replace(R.id.master_list_fragment, new MasterRecipesDetailsFragment().newInstance(mRecipe))
+                        .replace(R.id.master_list_fragment, MasterRecipesDetailsFragment.newInstance(mRecipe))
                         .commit();
 
                 fragmentManager.beginTransaction()
-                        .replace(R.id.master_list_container, new IngredientsFragment().newInstance(mRecipe))
+                        .replace(R.id.master_list_container, IngredientsFragment.newInstance(mRecipe))
                         .commit();
             }
         } else {
             mTwoPane = false;
-
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, new MasterRecipesDetailsFragment().newInstance(mRecipe))
+                    .replace(R.id.master_list_container, MasterRecipesDetailsFragment.newInstance(mRecipe))
                     .commit();
         }
 
@@ -66,13 +66,13 @@ public class RecipeDetailsActivity extends AppCompatActivity
         if (mTwoPane) {
             if (view.getId() == R.id.ingredients_card) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.master_list_container, new IngredientsFragment().newInstance(mRecipe))
+                        .replace(R.id.master_list_container, IngredientsFragment.newInstance(mRecipe))
                         .commit();
             }
         } else {
             if (view.getId() == R.id.ingredients_card) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.master_list_container, new IngredientsFragment().newInstance(mRecipe))
+                        .replace(R.id.master_list_container, IngredientsFragment.newInstance(mRecipe))
                         .addToBackStack(IngredientsFragment.class.getSimpleName())
                         .commit();
             }
@@ -102,11 +102,11 @@ public class RecipeDetailsActivity extends AppCompatActivity
     public void onStepSelected(int position) {
         if (mTwoPane) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, new StepFragment().newInstance(mRecipe.getSteps().get(position)))
+                    .replace(R.id.master_list_container, StepFragment.newInstance(mRecipe.getSteps().get(position)))
                     .commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, new StepFragment().newInstance(mRecipe.getSteps().get(position)))
+                    .replace(R.id.master_list_container, StepFragment.newInstance(mRecipe.getSteps().get(position)))
                     .addToBackStack(StepFragment.class.getSimpleName())
                     .commit();
         }

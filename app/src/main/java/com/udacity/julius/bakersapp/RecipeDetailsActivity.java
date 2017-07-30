@@ -1,7 +1,6 @@
 package com.udacity.julius.bakersapp;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -102,20 +101,45 @@ public class RecipeDetailsActivity extends AppCompatActivity
     public void onStepSelected(int position) {
         if (mTwoPane) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, StepFragment.newInstance(mRecipe.getSteps().get(position)))
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
                     .commit();
         } else {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, StepFragment.newInstance(mRecipe.getSteps().get(position)))
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
                     .addToBackStack(StepFragment.class.getSimpleName())
                     .commit();
         }
     }
 
     @Override
-    public void onFragmentInteraction(Uri uri) {
-
+    public void onMoveToNextStep(int position) {
+        if (mTwoPane) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
+                    .commit();
+        }
     }
 
-
+    @Override
+    public void onMoveToPreviousStep(int position) {
+        if (mTwoPane) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.master_list_container, StepFragment.newInstance(
+                            mRecipe.getSteps().get(position), position))
+                    .commit();
+        }
+    }
 }

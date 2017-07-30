@@ -50,7 +50,7 @@ import static android.content.Context.NOTIFICATION_SERVICE;
 public class StepFragment extends Fragment implements ExoPlayer.EventListener {
 
     // TODO: Rename parameter arguments, choose names that match
-    private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM1 = "param1", ARG_STEP_POSITION = "step_position";
     private static final String TAG = StepFragment.class.getSimpleName();
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
@@ -62,6 +62,10 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
     private View view;
+
+    private int mStepPosition;
+    private int resumeWindow;
+    private long resumePosition;
 
     private NotificationManager mNotificationManager;
 
@@ -76,10 +80,11 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
      * @param step Parameter 1.
      * @return A new instance of fragment StepFragment.
      */
-    public static StepFragment newInstance(Step step) {
+    public static StepFragment newInstance(Step step, int position) {
         StepFragment fragment = new StepFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_PARAM1, step);
+        args.putInt(ARG_STEP_POSITION, position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -89,6 +94,7 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mStep = getArguments().getParcelable(ARG_PARAM1);
+            mStepPosition = getArguments().getInt(ARG_STEP_POSITION);
         }
     }
 
@@ -98,6 +104,20 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
         if (view == null) {
             // Inflate the layout for this fragment
             view = inflater.inflate(R.layout.fragment_step, container, false);
+
+            view.findViewById(R.id.prev_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onMoveToPreviousStep(mStepPosition - 1);
+                }
+            });
+
+            view.findViewById(R.id.next_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.onMoveToNextStep(mStepPosition + 1);
+                }
+            });
 
             mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.playerView);
             TextView stepInstructionText = (TextView) view.findViewById(R.id.step_instruction);
@@ -293,7 +313,9 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
      * >Communicating with Other Fragments</a> for more information.
      */
     interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
+        void onMoveToNextStep(int position);
+
+        void onMoveToPreviousStep(int position);
     }
 
     /**

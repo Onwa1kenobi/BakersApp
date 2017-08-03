@@ -2,6 +2,10 @@ package com.udacity.julius.bakersapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -9,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.udacity.julius.bakersapp.IdlingResource.SimpleIdlingResource;
 import com.udacity.julius.bakersapp.model.Recipe;
 
 public class RecipeDetailsActivity extends AppCompatActivity
@@ -18,6 +23,22 @@ public class RecipeDetailsActivity extends AppCompatActivity
     public static Recipe mRecipe;
 
     private boolean mTwoPane;
+
+    // The Idling Resource which will be null in production.
+    @Nullable
+    private SimpleIdlingResource mIdlingResource;
+
+    /**
+     * Only called from test, creates and returns a new {@link SimpleIdlingResource}.
+     */
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getIdlingResource() {
+        if (mIdlingResource == null) {
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +55,10 @@ public class RecipeDetailsActivity extends AppCompatActivity
             menuToolbar.setTitle(mRecipe.getName());
         }
 
-        if (findViewById(R.id.tablet_linear_layout) != null) {
-            mTwoPane = true;
+        if (savedInstanceState == null) {
 
-            if (savedInstanceState == null) {
+            if (findViewById(R.id.tablet_linear_layout) != null) {
+                mTwoPane = true;
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -48,14 +69,17 @@ public class RecipeDetailsActivity extends AppCompatActivity
                 fragmentManager.beginTransaction()
                         .replace(R.id.master_list_container, IngredientsFragment.newInstance(mRecipe))
                         .commit();
+            } else {
+                mTwoPane = false;
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.master_list_container, MasterRecipesDetailsFragment.newInstance(mRecipe))
+                        .commit();
             }
-        } else {
-            mTwoPane = false;
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.master_list_container, MasterRecipesDetailsFragment.newInstance(mRecipe))
-                    .commit();
+
         }
 
+        // Get the IdlingResource instance
+        getIdlingResource();
 
     }
 
@@ -102,12 +126,12 @@ public class RecipeDetailsActivity extends AppCompatActivity
         if (mTwoPane) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .commit();
         } else {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .addToBackStack(StepFragment.class.getSimpleName())
                     .commit();
         }
@@ -118,12 +142,12 @@ public class RecipeDetailsActivity extends AppCompatActivity
         if (mTwoPane) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .commit();
         } else {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .commit();
         }
     }
@@ -133,12 +157,12 @@ public class RecipeDetailsActivity extends AppCompatActivity
         if (mTwoPane) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .commit();
         } else {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.master_list_container, StepFragment.newInstance(
-                            mRecipe.getSteps().get(position), position))
+                            mRecipe.getSteps().get(position), position, mRecipe.getSteps().size()))
                     .commit();
         }
     }

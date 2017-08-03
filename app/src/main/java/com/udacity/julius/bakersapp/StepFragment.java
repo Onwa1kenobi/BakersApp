@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -51,6 +52,7 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
 
     // TODO: Rename parameter arguments, choose names that match
     private static final String ARG_PARAM1 = "param1", ARG_STEP_POSITION = "step_position";
+    private static final String ARG_STEP_COUNT = "steps_count";
     private static final String TAG = StepFragment.class.getSimpleName();
     private static MediaSessionCompat mMediaSession;
     private PlaybackStateCompat.Builder mStateBuilder;
@@ -61,17 +63,12 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
 
     private SimpleExoPlayer mExoPlayer;
     private SimpleExoPlayerView mPlayerView;
-    private View view;
 
-    private int mStepPosition;
+    private int mStepPosition, mStepsCount;
     private int resumeWindow;
     private long resumePosition;
 
     private NotificationManager mNotificationManager;
-
-    public StepFragment() {
-        // Required empty public constructor
-    }
 
     /**
      * Use this factory method to create a new instance of
@@ -80,11 +77,12 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
      * @param step Parameter 1.
      * @return A new instance of fragment StepFragment.
      */
-    public static StepFragment newInstance(Step step, int position) {
+    public static StepFragment newInstance(Step step, int position, int count) {
         StepFragment fragment = new StepFragment();
         Bundle args = new Bundle();
         args.putParcelable(ARG_PARAM1, step);
         args.putInt(ARG_STEP_POSITION, position);
+        args.putInt(ARG_STEP_COUNT, count);
         fragment.setArguments(args);
         return fragment;
     }
@@ -95,40 +93,68 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
         if (getArguments() != null) {
             mStep = getArguments().getParcelable(ARG_PARAM1);
             mStepPosition = getArguments().getInt(ARG_STEP_POSITION);
+            mStepsCount = getArguments().getInt(ARG_STEP_COUNT);
         }
+
+        clearResumePosition();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if (view == null) {
-            // Inflate the layout for this fragment
-            view = inflater.inflate(R.layout.fragment_step, container, false);
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_step, container, false);
 
-            view.findViewById(R.id.prev_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.onMoveToPreviousStep(mStepPosition - 1);
-                }
-            });
-
-            view.findViewById(R.id.next_button).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.onMoveToNextStep(mStepPosition + 1);
-                }
-            });
-
-            mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.playerView);
-            TextView stepInstructionText = (TextView) view.findViewById(R.id.step_instruction);
-
-            stepInstructionText.setText(mStep.getDescription());
-            initializeMediaSession();
-
-            initializePlayer(Uri.parse(mStep.getVideoURL()));
+        if (mStepPosition == 0) {
+            view.findViewById(R.id.prev_button).setVisibility(View.INVISIBLE);
         }
 
+        if (mStepPosition == (mStepsCount - 1)) {
+            view.findViewById(R.id.next_button).setVisibility(View.INVISIBLE);
+        }
+
+        view.findViewById(R.id.prev_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onMoveToPreviousStep(mStepPosition - 1);
+            }
+        });
+
+        view.findViewById(R.id.next_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onMoveToNextStep(mStepPosition + 1);
+            }
+        });
+
+        mPlayerView = (SimpleExoPlayerView) view.findViewById(R.id.playerView);
+        TextView stepInstructionText = (TextView) view.findViewById(R.id.step_instruction);
+
+        stepInstructionText.setText(mStep.getDescription());
+        initializeMediaSession();
+
+        initializePlayer(Uri.parse(mStep.getVideoURL()));
+
+        setRetainInstance(true);
+
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mExoPlayer == null) {
+            initializePlayer(Uri.parse(mStep.getVideoURL()));
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (mExoPlayer != null) {
+            releasePlayer();
+        }
+        mMediaSession.setActive(false);
     }
 
     private void initializeMediaSession() {
@@ -174,16 +200,35 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
             String userAgent = Util.getUserAgent(getActivity(), "BakersApp");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     getActivity(), userAgent), new DefaultExtractorsFactory(), null, null);
-            mExoPlayer.prepare(mediaSource);
+
+            boolean haveResumePosition = resumeWindow != C.INDEX_UNSET;
+            if (haveResumePosition) {
+                mExoPlayer.seekTo(resumeWindow, resumePosition);
+            }
+            mExoPlayer.prepare(mediaSource, !haveResumePosition, false);
             mExoPlayer.setPlayWhenReady(true);
         }
     }
 
     private void releasePlayer() {
-        mNotificationManager.cancelAll();
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if (mExoPlayer != null) {
+            updateResumePosition();
+            mNotificationManager.cancelAll();
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
+    private void updateResumePosition() {
+        resumeWindow = mExoPlayer.getCurrentWindowIndex();
+        resumePosition = mExoPlayer.isCurrentWindowSeekable() ? Math.max(0, mExoPlayer.getCurrentPosition())
+                : C.TIME_UNSET;
+    }
+
+    private void clearResumePosition() {
+        resumeWindow = C.INDEX_UNSET;
+        resumePosition = C.TIME_UNSET;
     }
 
     @Override
@@ -291,15 +336,6 @@ public class StepFragment extends Fragment implements ExoPlayer.EventListener {
 
         mNotificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
         mNotificationManager.notify(0, builder.build());
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (mExoPlayer != null) {
-            releasePlayer();
-        }
-        mMediaSession.setActive(false);
     }
 
     /**

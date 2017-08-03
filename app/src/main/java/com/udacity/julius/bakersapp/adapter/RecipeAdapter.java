@@ -25,7 +25,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private static final String TAG = "RecipeAdapter";
     private final int INGREDIENT = 0, STEP = 1;
-    Context mContext;
+    private Context mContext;
     private List<Object> items = new ArrayList<>();
     private ListItemClickListener mOnClickListener;
 
@@ -62,10 +62,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 View v2 = inflater.inflate(R.layout.item_layout_step, viewGroup, false);
                 viewHolder = new ViewHolderStep(v2);
                 break;
-            default:
-                View v = inflater.inflate(android.R.layout.simple_list_item_1, viewGroup, false);
-//                viewHolder = new RecyclerViewSimpleTextViewHolder(v);
-                break;
         }
         return viewHolder;
     }
@@ -81,10 +77,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 ViewHolderStep vh2 = (ViewHolderStep) viewHolder;
                 configureViewHolderStep(vh2, position);
                 break;
-            default:
-//                RecyclerViewSimpleTextViewHolder vh = (RecyclerViewSimpleTextViewHolder) viewHolder;
-//                configureDefaultViewHolder(vh, position);
-                break;
         }
     }
 
@@ -98,8 +90,12 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     private void configureViewHolderStep(ViewHolderStep vh2, int position) {
-        Glide.with(mContext).load(((Step) items.get(position)).getThumbnailURL()).centerCrop()
-                .placeholder(R.mipmap.ic_launcher_round).into(vh2.getImageView());
+        try {
+            Glide.with(mContext).load(((Step) items.get(position)).getThumbnailURL()).centerCrop()
+                    .placeholder(R.mipmap.ic_launcher_round).into(vh2.getImageView());
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        }
         vh2.getTextView().setText("Step " + String.valueOf(((Step) items.get(position)).getId()) + ": " + ((Step) items.get(position)).getShortDescription());
     }
 
@@ -118,8 +114,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         } else if (type == STEP) {
             items.addAll(recipes.getSteps());
             notifyDataSetChanged();
-        } else {
-//            Toast.makeText(, "No data", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -127,10 +121,10 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         void onListItemClick(int clickedItemIndex);
     }
 
-    public class ViewHolderIngredient extends RecyclerView.ViewHolder {
+    private class ViewHolderIngredient extends RecyclerView.ViewHolder {
         private final TextView ingredientName, ingredientQuantity, ingredientMeasure;
 
-        public ViewHolderIngredient(View v) {
+        ViewHolderIngredient(View v) {
             super(v);
             // Define click listener for the ViewHolder's View.
             ingredientName = (TextView) v.findViewById(R.id.ingredient_name);
@@ -138,25 +132,25 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ingredientMeasure = (TextView) v.findViewById(R.id.ingredient_measure);
         }
 
-        public TextView getIngredientName() {
+        TextView getIngredientName() {
             return ingredientName;
         }
 
-        public TextView getIngredientQuantity() {
+        TextView getIngredientQuantity() {
             return ingredientQuantity;
         }
 
-        public TextView getIngredientMeasure() {
+        TextView getIngredientMeasure() {
             return ingredientMeasure;
         }
 
     }
 
-    public class ViewHolderStep extends RecyclerView.ViewHolder {
+    private class ViewHolderStep extends RecyclerView.ViewHolder {
         private final TextView textView;
         private ImageView imageView;
 
-        public ViewHolderStep(View v) {
+        ViewHolderStep(View v) {
             super(v);
 
             v.setOnClickListener(new View.OnClickListener() {
@@ -170,11 +164,11 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             imageView = (ImageView) v.findViewById(R.id.step_image);
         }
 
-        public TextView getTextView() {
+        TextView getTextView() {
             return textView;
         }
 
-        public ImageView getImageView() {
+        ImageView getImageView() {
             return imageView;
         }
     }

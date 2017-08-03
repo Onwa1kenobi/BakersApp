@@ -22,7 +22,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
     private static final String TAG = "HomeAdapter";
 
     final private ListItemClickListener mOnClickListener;
-    Context mContext;
+    private Context mContext;
 
     private ArrayList<Recipe> mRecipe;
 
@@ -66,11 +66,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         void onListItemClick(int clickedItemIndex);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView textView;
         private ImageView imageView;
 
-        public ViewHolder(View v) {
+        ViewHolder(View v) {
             super(v);
             // Define click listener for the ViewHolder's View.
             v.setOnClickListener(new View.OnClickListener() {
@@ -84,11 +84,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             imageView = (ImageView) v.findViewById(R.id.recipe_image);
         }
 
-        public TextView getTextView() {
+        TextView getTextView() {
             return textView;
         }
 
-        public ImageView getImageView() {
+        ImageView getImageView() {
             return imageView;
         }
 

@@ -2,6 +2,7 @@ package com.udacity.julius.bakersapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DividerItemDecoration;
@@ -20,16 +21,14 @@ import java.util.List;
 public class MasterRecipesDetailsFragment extends Fragment implements
         RecipeAdapter.ListItemClickListener {
     private static final String ARG_RECIPE = "arg_recipe";
+    private static final String BUNDLE_RECYCLER_LAYOUT = "recycler_state_key";
 
     private View view;
 
     private OnRecipeClickListener mCallback;
 
     private Recipe mRecipe;
-
-    public MasterRecipesDetailsFragment() {
-        // Required empty public constructor
-    }
+    private RecyclerView mRecyclerView;
 
     public static MasterRecipesDetailsFragment newInstance(Recipe recipe) {
         MasterRecipesDetailsFragment fragment = new MasterRecipesDetailsFragment();
@@ -64,19 +63,34 @@ public class MasterRecipesDetailsFragment extends Fragment implements
                 }
             });
 
-            RecyclerView mRecyclerView = (RecyclerView) view.findViewById(R.id.steps_recycler);
+            mRecyclerView = (RecyclerView) view.findViewById(R.id.steps_recycler);
             mRecyclerView.setHasFixedSize(true);
+            mRecyclerView.setSaveEnabled(true);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            RecipeAdapter mAdapter = new RecipeAdapter(getActivity(), this);
+            RecipeAdapter mAdapter = new RecipeAdapter(getContext(), this);
             mAdapter.refill(mRecipe, 1);
             mRecyclerView.setAdapter(mAdapter);
+
+            if (savedInstanceState != null) {
+                Parcelable savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+                mRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+            }
 
             RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getActivity(),
                     DividerItemDecoration.VERTICAL);
             mRecyclerView.addItemDecoration(itemDecoration);
         }
 
+        setRetainInstance(true);
+
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(BUNDLE_RECYCLER_LAYOUT, mRecyclerView.getLayoutManager()
+                .onSaveInstanceState());
     }
 
     private ArrayList<Object> getSampleArrayList(List<Recipe> recipe) {

@@ -94,10 +94,11 @@ public class HomeActivity extends AppCompatActivity implements HomeAdapter.ListI
             mProgressBar.setVisibility(View.VISIBLE);
 
             mRecyclerView.setVisibility(View.INVISIBLE);
-            mErrorMessageText.setVisibility(View.INVISIBLE);
+            mErrorMessageText.setVisibility(View.GONE);
 
             // Get the IdlingResource instance
             getIdlingResource();
+
             mProgressBar.setVisibility(View.VISIBLE);
         }
     }
@@ -132,7 +133,7 @@ public class HomeActivity extends AppCompatActivity implements HomeAdapter.ListI
     private void showDataContent() {
         mRecyclerView.setVisibility(View.VISIBLE);
         mProgressBar.setVisibility(View.INVISIBLE);
-        mErrorMessageText.setVisibility(View.INVISIBLE);
+        mErrorMessageText.setVisibility(View.GONE);
     }
 
     public void setRecyclerViewLayoutManager(LayoutManagerType layoutManagerType) {
@@ -164,8 +165,10 @@ public class HomeActivity extends AppCompatActivity implements HomeAdapter.ListI
 
     @Override
     public void onListItemClick(int selectedItemIndex) {
-        startActivity(new Intent(this, RecipeDetailsActivity.class).putExtra(Intent.EXTRA_TEXT,
-                mRecipes.get(selectedItemIndex)));
+        if (mRecipes.size() > 0) {
+            startActivity(new Intent(this, RecipeDetailsActivity.class).putExtra(Intent.EXTRA_TEXT,
+                    mRecipes.get(selectedItemIndex)));
+        }
     }
 
     @Override

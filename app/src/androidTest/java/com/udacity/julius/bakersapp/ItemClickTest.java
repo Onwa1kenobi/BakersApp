@@ -32,7 +32,7 @@ import static org.hamcrest.Matchers.allOf;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
-public class HomeActivityEspressoTest {
+public class ItemClickTest {
 
     @Rule
     public ActivityTestRule<HomeActivity> mActivityTestRule = new ActivityTestRule<>(HomeActivity.class);
@@ -67,13 +67,13 @@ public class HomeActivityEspressoTest {
     }
 
     @Test
-    public void homeActivityTest() {
+    public void itemClickTest() {
         ViewInteraction recyclerView = onView(
                 allOf(withId(R.id.recipes_recycler), isDisplayed()));
-        recyclerView.perform(actionOnItemAtPosition(1, click()));
+        recyclerView.perform(actionOnItemAtPosition(2, click()));
 
         ViewInteraction textView = onView(
-                allOf(withText("Brownies"),
+                allOf(withText("Yellow Cake"),
                         childAtPosition(
                                 allOf(withId(R.id.recipe_details_toolbar),
                                         childAtPosition(
@@ -81,7 +81,7 @@ public class HomeActivityEspressoTest {
                                                 0)),
                                 0),
                         isDisplayed()));
-        textView.check(matches(withText("Brownies")));
+        textView.check(matches(withText("Yellow Cake")));
 
     }
 

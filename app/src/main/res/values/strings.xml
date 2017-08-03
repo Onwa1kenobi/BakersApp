@@ -14,7 +14,7 @@
     <string name="add_widget">Add widget</string>
     <string name="ingredient_list_empty">Ingredient List is Empty</string>
     <string name="empty_string">No data available</string>
-    <string name="internet_error">Failed to connect to the internet. Please Try again.</string>
+    <string name="internet_error">Failed to connect to the internet.\n Please Try again.</string>
 
     <string name="pref_recipe_label">Choose Favorite Recipe</string>
     <string name="pref_recipe_nutella_pie_label">Nutella Pie</string>
